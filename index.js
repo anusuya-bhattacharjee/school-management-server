@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const multer = require('multer');
 const jwt = require('jsonwebtoken');
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 const app = express();
@@ -41,11 +41,11 @@ async function run() {
       .collection("Student");
     console.log("db connected!!!!");
 
-    app.post("/addStudentDetails", async (req, res) => {
+    app.post("/addStudentDetails", async (req, res) => { 
       const student = req.body;
       const query = { email_address: student.email_address };
       const options = { upsert: true };
-      const updatedDoc = {
+      const updatedDoc = { 
         $set: {
           studentId: student.studentId,
           firstName: student.firstName,
@@ -68,11 +68,38 @@ async function run() {
     });
 
     app.get('/allProfiles', async (req, res) => {
-        const query = {};
-        const cursor = StudentCollention.find(query);
-        const allProfiles = await cursor.toArray();
-        res.send(allProfiles);
+      const query = {};
+      const cursor = StudentCollention.find(query);
+      const allProfiles = await cursor.toArray();
+      res.send(allProfiles);
     })
+
+    app.get('/student/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)};
+      const dress = await StudentCollention.findOne(query);
+      res.send(dress);
+  })
+
+  app.put('/updateStudent/:id', async(req, res) => {
+    const id = req.params.id;
+    const data = req.body;
+    const query = {_id: ObjectId(id)};
+    const options = {upsert: true};
+    const updatedDoc = {
+        $set: {
+          studentId: data.studentId,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          address: data.address,
+          pincode: data.pincode,
+          phone: data.phone
+        }
+    };
+    const result = await StudentCollention.updateOne(query, updatedDoc, options);
+    const dress = await StudentCollention.findOne(query);
+    res.send(dress);
+})
 
     app.get('/admin/:email', async (req, res) => {
         const email = req.params.email;
