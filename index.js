@@ -9,7 +9,6 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-// app.use(multer().single('image'));
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.2uf9b.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -44,8 +43,6 @@ async function run() {
 
     app.post("/addStudentDetails", async (req, res) => {
       const student = req.body;
-    //   const image = req.file;
-    //   console.log(image);
       const query = { email_address: student.email_address };
       const options = { upsert: true };
       const updatedDoc = {
@@ -56,7 +53,6 @@ async function run() {
           address: student.address,
           pincode: student.pincode,
           phone: student.phone,
-        //   image: student.image
         },
       };
       const result = await StudentCollention.updateOne(query, updatedDoc, options);
