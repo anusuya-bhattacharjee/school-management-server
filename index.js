@@ -53,6 +53,7 @@ async function run() {
           address: student.address,
           pincode: student.pincode,
           phone: student.phone,
+          image: student.image,
         },
       };
       const result = await StudentCollention.updateOne(query, updatedDoc, options);
@@ -93,7 +94,8 @@ async function run() {
           lastName: data.lastName,
           address: data.address,
           pincode: data.pincode,
-          phone: data.phone
+          phone: data.phone,
+          image: data.image
         }
     };
     const result = await StudentCollention.updateOne(query, updatedDoc, options);
@@ -104,8 +106,16 @@ async function run() {
     app.get('/admin/:email', async (req, res) => {
         const email = req.params.email;
         const user = await registeredUserCollection.findOne({email: email});
-        const isAdmin = user.role === "admin";
-        res.send({admin: isAdmin});
+        if (user.role === "admin"){
+          res.send({admin: true})
+          console.log("admin")
+        }
+        else{
+          res.send({admin: false})
+          console.log("student")
+        }
+        // const isAdmin = user.role === "admin";
+        // res.send({admin: isAdmin})
     })
 
     app.put('/user/:email', async (req, res) => {
@@ -114,7 +124,7 @@ async function run() {
         const filter = { email: email };
         const options = { upsert: true};
         const updatedDoc = {
-          $set: user,
+          $set: user
         };
         const result = await registeredUserCollection.updateOne(filter, updatedDoc, options);
         const token = jwt.sign({email: email}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1hr'})
