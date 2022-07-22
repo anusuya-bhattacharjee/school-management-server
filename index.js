@@ -94,8 +94,7 @@ async function run() {
           lastName: data.lastName,
           address: data.address,
           pincode: data.pincode,
-          phone: data.phone,
-          image: data.image
+          phone: data.phone
         }
     };
     const result = await StudentCollention.updateOne(query, updatedDoc, options);
@@ -106,11 +105,13 @@ async function run() {
     app.get('/admin/:email', async (req, res) => {
         const email = req.params.email;
         const user = await registeredUserCollection.findOne({email: email});
+        if (user.role) {
         if (user.role === "admin"){
           res.send({admin: true})
           console.log("admin")
         }
-        else{
+      }
+        else {
           res.send({admin: false})
           console.log("student")
         }
