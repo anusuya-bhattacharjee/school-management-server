@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const multer = require('multer');
+const fs = require('fs');
+const pdf = require('html-pdf');
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
@@ -39,6 +41,7 @@ async function run() {
     const StudentCollention = client
       .db("SchoolManagement")
       .collection("Student");
+      const AttendanceCollection = client.db("SchoolManagement").collection('Attendance');
     console.log("db connected!!!!");
 
     app.post("/addStudentDetails", async (req, res) => { 
@@ -131,6 +134,31 @@ async function run() {
         const token = jwt.sign({email: email}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1hr'})
         res.send({result, token});
       })
+
+      app.get('/pdf', async (req, res) => {
+        const html = fs.readFileSync('./Pdf.html', 'utf8');
+        let options = {
+          format: 'Letter'
+        }
+        pdf.create(html, options).toFile('./school.pdf', function(err, resp){
+          if(err) return console.log(err);
+          console.log(resp);
+        })
+        res.send("Your PDF Done!");
+      })
+
+      app.get('/pdfDownload', (req, res) => {
+        res.download("./school.pdf")
+      })
+
+      app.get('/studentId/:id', async (req, res) => {
+        const id = parseInt(req.params.id);
+        console.log("Student ID is: ",id);
+        const query = {s_id: id};
+        const Attendance = await AttendanceCollection.findOne(query)
+        res.send(Attendance);
+      })
+
   } 
   finally {
   }
